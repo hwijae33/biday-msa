@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class FtpApplication {
+public class FtpServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FtpApplication.class, args);
+        SpringApplication.run(FtpServiceApplication.class, args);
     }
 
 }

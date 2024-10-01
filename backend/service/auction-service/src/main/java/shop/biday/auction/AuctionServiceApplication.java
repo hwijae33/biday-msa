@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class AuctionApplication {
+public class AuctionServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AuctionApplication.class, args);
+		SpringApplication.run(AuctionServiceApplication.class, args);
 	}
 
 }
