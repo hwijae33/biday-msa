@@ -36,4 +36,15 @@ out/
 ### VS Code ###
 .vscode/
 
+# yaml&yml
 **/*.yml
+**/*.yaml
+
+# MacOS 관련 파일
+.DS_Store
+
+# 로그 파일
+*.log
+
+# 환경 파일
+.env

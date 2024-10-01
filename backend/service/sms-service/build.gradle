@@ -1,8 +1,31 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'shop.biday'
+version = '0.0.1'
+
+jar.enabled = false
+bootJar.enabled = true
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
