@@ -5,25 +5,63 @@ plugins {
 }
 
 group = 'shop.biday'
-version = '0.0.1'
+version = '0.0.1-SNAPSHOT'
 
 jar.enabled = false
 bootJar.enabled = true
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
+ext {
+    set('springCloudVersion', "2023.0.2")
+}
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+dependencies {
+    // spring boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // mongoDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // image-storage
+//	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.529')
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.767')
+    implementation 'com.amazonaws:aws-java-sdk-s3'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // jwt
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
+
+    // swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+    // test
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
