@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'shop.biday'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 jar.enabled = false
 bootJar.enabled = true
