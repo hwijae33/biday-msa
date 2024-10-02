@@ -22,7 +22,7 @@ public class QWishRepositoryImpl implements QWishRepository {
 
         queryFactory.delete(wishEntity)
                 .where(wishEntity.userId.eq(userId)
-                        .and(wishEntity.id.eq(productId)))
+                        .and(wishEntity.product.id.eq(productId)))
                 .execute();
     }
 
