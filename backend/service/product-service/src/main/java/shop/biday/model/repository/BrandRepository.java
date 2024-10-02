@@ -1,9 +1,9 @@
-package shop.biday.product.model.repository;
+package shop.biday.model.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import shop.biday.product.model.domain.BrandModel;
-import shop.biday.product.model.entity.BrandEntity;
+import shop.biday.model.domain.BrandModel;
+import shop.biday.model.entity.BrandEntity;
 
 import java.util.List;
 import java.util.Optional;

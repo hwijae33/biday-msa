@@ -1,13 +1,8 @@
 package shop.biday.service.impl;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.util.IOUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +12,10 @@ import shop.biday.model.document.ImageDocument;
 import shop.biday.model.domain.ImageModel;
 import shop.biday.model.repository.ImageRepository;
 import shop.biday.service.ImageService;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
-    private final AmazonS3Client amazonS3Client;
+    private final S3Client amazonS3Client;
 
     @Value("${spring.s3.bucket}")
     private String bucketName;
@@ -82,16 +81,18 @@ public class ImageServiceImpl implements ImageService {
     }
 
     private String uploadToS3(MultipartFile file, String filePath, String uploadFileName, StringBuilder resultMessage) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(file.getSize());
-        objectMetadata.setContentType(file.getContentType());
-
         try (InputStream inputStream = file.getInputStream()) {
             String keyName = filePath + "/" + uploadFileName;
 
-            amazonS3Client.putObject(new PutObjectRequest(bucketName, keyName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(keyName)
+                    .acl(ObjectCannedACL.PUBLIC_READ)
+                    .contentLength(file.getSize())
+                    .contentType(file.getContentType())
+                    .build();
 
+            amazonS3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, file.getSize()));
             log.info("File uploaded to S3: {}/{}", bucketName, keyName);
             return "https://kr.object.ncloudstorage.com/" + bucketName + "/" + keyName;
 
@@ -186,20 +187,32 @@ public class ImageServiceImpl implements ImageService {
     }
 
     private ResponseEntity<byte[]> fetchImageFromS3(ImageDocument image, String logMessage) throws IOException {
-        S3Object s3Object = amazonS3Client.getObject(bucketName, image.getUploadPath() + "/" + image.getUploadName());
-        log.debug(logMessage, image.getOriginalName());
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(IOUtils.toByteArray(s3Object.getObjectContent()));
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(image.getUploadPath() + "/" + image.getUploadName())
+                .build();
+
+        try (ResponseInputStream<GetObjectResponse> s3Object = amazonS3Client.getObject(getObjectRequest)) {
+            log.debug(logMessage, image.getOriginalName());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(IOUtils.toByteArray(s3Object));
+        }
     }
 
     private ResponseEntity<byte[]> fetchErrorImage() throws IOException {
         ImageModel errorImage = imageRepository.findByTypeAndUploadPath("에러", "error");
-        S3Object s3Object = amazonS3Client.getObject(bucketName, errorImage.getUploadPath() + "/" + errorImage.getUploadName());
-        log.debug("Fetching error image from S3");
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(IOUtils.toByteArray(s3Object.getObjectContent()));
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(errorImage.getUploadPath() + "/" + errorImage.getUploadName())
+                .build();
+
+        try (ResponseInputStream<GetObjectResponse> s3Object = amazonS3Client.getObject(getObjectRequest)) {
+            log.debug("Fetching error image from S3");
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(IOUtils.toByteArray(s3Object));
+        }
     }
 
     @Override

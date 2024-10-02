@@ -1,7 +1,7 @@
-package shop.biday.product.model.repository;
+package shop.biday.model.repository;
 
-import shop.biday.product.model.domain.ProductModel;
-import shop.biday.product.model.dto.ProductDto;
+import shop.biday.model.domain.ProductModel;
+import shop.biday.model.dto.ProductDto;
 
 import java.util.List;
 import java.util.Map;

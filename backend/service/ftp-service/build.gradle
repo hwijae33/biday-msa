@@ -40,9 +40,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     // image-storage
-//	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.529')
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.767')
-    implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation platform('software.amazon.awssdk:bom:2.20.0') // 최신 버전으로 수정
+    implementation 'software.amazon.awssdk:s3'
+
+    // apache
+    implementation 'commons-io:commons-io:2.11.0'
 
     // lombok
     compileOnly 'org.projectlombok:lombok'

@@ -1,12 +1,11 @@
-package shop.biday.product.model.repository.impl;
+package shop.biday.model.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import shop.biday.product.model.entity.QWishEntity;
-import shop.biday.product.model.entity.WishEntity;
-import shop.biday.product.model.repository.QWishRepository;
+import shop.biday.model.entity.QWishEntity;
+import shop.biday.model.entity.WishEntity;
+import shop.biday.model.repository.QWishRepository;
 
 import java.util.List;
 

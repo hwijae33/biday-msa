@@ -1,4 +1,4 @@
-package shop.biday.product.model.repository.impl;
+package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
@@ -9,11 +9,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import shop.biday.product.model.domain.ProductModel;
-import shop.biday.product.model.domain.SizeModel;
-import shop.biday.product.model.dto.ProductDto;
-import shop.biday.product.model.entity.*;
-import shop.biday.product.model.repository.QProductRepository;
+import shop.biday.model.domain.ProductModel;
+import shop.biday.model.domain.SizeModel;
+import shop.biday.model.dto.ProductDto;
+import shop.biday.model.entity.*;
+import shop.biday.model.repository.QProductRepository;
 
 import java.util.List;
 import java.util.Map;
