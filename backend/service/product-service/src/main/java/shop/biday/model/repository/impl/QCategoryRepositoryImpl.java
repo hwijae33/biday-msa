@@ -1,13 +1,13 @@
-package shop.biday.product.model.repository.impl;
+package shop.biday.model.repository.impl;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import shop.biday.product.model.domain.CategoryModel;
-import shop.biday.product.model.entity.QCategoryEntity;
-import shop.biday.product.model.repository.QCategoryRepository;
+import shop.biday.model.domain.CategoryModel;
+import shop.biday.model.entity.QCategoryEntity;
+import shop.biday.model.repository.QCategoryRepository;
 
 import java.util.List;
 

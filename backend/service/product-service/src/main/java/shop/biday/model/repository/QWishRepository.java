@@ -1,6 +1,6 @@
-package shop.biday.product.model.repository;
+package shop.biday.model.repository;
 
-import shop.biday.product.model.entity.WishEntity;
+import shop.biday.model.entity.WishEntity;
 
 import java.util.List;
 

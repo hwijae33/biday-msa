@@ -1,6 +1,6 @@
-package shop.biday.product.model.repository;
+package shop.biday.model.repository;
 
-import shop.biday.product.model.domain.SizeModel;
+import shop.biday.model.domain.SizeModel;
 
 import java.util.List;
 

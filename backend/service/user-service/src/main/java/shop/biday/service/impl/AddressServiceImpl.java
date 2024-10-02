@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import shop.biday.jwt.JWTUtil;
-import shop.biday.jwt.JwtClaims;
 import shop.biday.model.document.AddressDocument;
 import shop.biday.model.domain.AddressModel;
 import shop.biday.model.enums.AddressType;
@@ -19,7 +17,6 @@ import shop.biday.service.AddressService;
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
     private final MAddressRepository addressRepository;
-    private final JWTUtil jwtUtil;
 
     @Override
     public Flux<AddressDocument> findAll() {
@@ -33,9 +30,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public Mono<AddressDocument> save(String token, AddressModel addressModel) {
-        JwtClaims claims = jwtUtil.extractClaims(token);
-        String userId = claims.getUserId();
+    public Mono<AddressDocument> save(String userId, AddressModel addressModel) {
 
         AddressType addressType;
         try {
@@ -45,7 +40,7 @@ public class AddressServiceImpl implements AddressService {
         }
 
         AddressType finalAddressType = addressType;
-        return countByUserId(token)
+        return countByUserId(userId)
                 .flatMap(count -> {
                     if (count >= 3) {
                         return Mono.error(new IllegalStateException("최대 주소 가능 갯수는 3개 입니다."));
@@ -81,9 +76,7 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.deleteById(id).hasElement();
     }
 
-    public Mono<Long> countByUserId(String token) {
-        JwtClaims claims = jwtUtil.extractClaims(token);
-        String userId = claims.getUserId();
+    public Mono<Long> countByUserId(String userId) {
         return addressRepository.countByUserId(userId);
     }
 
