@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public static String removeParentheses(String productName) {
-        int index = productName.indexOf(" (");
+        int index = productName.indexOf("(");
         return (index != -1) ? productName.substring(0, index) : productName;
     }
 
