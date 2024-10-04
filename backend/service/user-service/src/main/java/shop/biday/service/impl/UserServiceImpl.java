@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
                             .oauthUser(userModel.getOauthName())
                             .name(userModel.getName())
                             .phone(userModel.getPhoneNum())
-                            .password(passwordEncoder.encode(userModel.getPassword())) // BCrypt 해시 사용
+                            .password(passwordEncoder.encode(userModel.getEmail()))
                             .role(Collections.singletonList(Role.ROLE_USER))
                             .status(true)
                             .totalRating(2.0)
