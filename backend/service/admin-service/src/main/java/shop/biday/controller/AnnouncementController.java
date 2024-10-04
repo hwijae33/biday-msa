@@ -14,7 +14,6 @@ import shop.biday.model.domain.AnnouncementModel;
 import shop.biday.service.AnnouncementService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
