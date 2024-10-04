@@ -49,6 +49,9 @@ public class  CustomReactiveAuthenticationManager implements ReactiveAuthenticat
 
 
     private boolean isPasswordValid(String rawPassword, String encodedPassword) {
+        System.out.println("rawPassword : "+rawPassword);
+        System.out.println("encodedPassword : " +encodedPassword);
+        System.out.println("passwordEncoder.matches : " +passwordEncoder.matches(rawPassword, encodedPassword));
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 

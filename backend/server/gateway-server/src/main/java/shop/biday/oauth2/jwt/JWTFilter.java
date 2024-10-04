@@ -73,16 +73,7 @@ public class JWTFilter implements WebFilter {
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userModel);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
 
-        ServerHttpRequest request = exchange.getRequest().mutate()
-                .header("userId", id)
-                .header("role", roleString)
-                .header("name", name)
-                .build();
-
-        HttpHeaders headers = request.getHeaders();
-        String nameValue = headers.getFirst("name");
-
-        System.out.println("name header value: " + nameValue);
+        ServerHttpRequest request = exchange.getRequest().mutate().build();
 
         // 업데이트된 요청으로 exchange를 재구성
         ServerWebExchange mutatedExchange = exchange.mutate().request(request).build();

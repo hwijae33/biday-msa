@@ -1,15 +1,18 @@
 package shop.biday.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import shop.biday.model.document.AccountDocument;
 import shop.biday.model.domain.AccountModel;
+import shop.biday.model.domain.UserInfoModel;
 import shop.biday.model.enums.Role;
 import shop.biday.model.repository.MAccountRepository;
 import shop.biday.model.repository.MUserRepository;
 import shop.biday.service.AccountService;
+import shop.biday.utils.UserInfoUtils;
 
 
 import java.util.Collections;
@@ -20,10 +23,14 @@ import java.util.Collections;
 public class AccountServiceImpl implements AccountService {
     private final MAccountRepository accountRepository;
     private final MUserRepository userRepository;
+    private final UserInfoUtils userInfoUtils;
 
     @Override
-    public Mono<AccountDocument> findByUserId(String userId) {
-        return accountRepository.findByUserId(userId);
+    public Mono<AccountDocument> findByUserId(String userInfoHeader) {
+
+        UserInfoModel userInfo = userInfoUtils.extractUserInfo(userInfoHeader);
+
+        return accountRepository.findByUserId(userInfo.getUserId());
     }
 
     @Override
