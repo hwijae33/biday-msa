@@ -18,15 +18,15 @@ public interface AuctionService {
 
     List<AuctionDto> findAllBySize(Long sizeId, String order);
 
-    Slice<AuctionDto> findByUser(String role, String userId, String period, Long cursor, Pageable pageable);
+    Slice<AuctionDto> findByUser(String userInfoHeader, String period, Long cursor, Pageable pageable);
 
     AuctionEntity updateState(Long id);
 
     boolean existsById(Long id);
 
-    AuctionEntity save(String role, String userId, AuctionModel auction);
+    AuctionEntity save(String userInfoHeader, AuctionModel auction);
 
-    AuctionEntity update(String role, String userId, AuctionModel auction);
+    AuctionEntity update(String userInfoHeader, AuctionModel auction);
 
-    String deleteById(String role, String userId, Long id);
+    String deleteById(String userInfoHeader, Long id);
 }
