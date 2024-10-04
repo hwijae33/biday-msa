@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
@@ -31,6 +33,19 @@ public class AuctionServiceImpl implements AuctionService {
                     log.warn("Auction not found for id: {}", id);
                     return null;
                 });
+    }
+
+    @Override
+    public Mono<AuctionDto> findByAuctionId(Long auctionId) {
+        return Mono.fromCallable(() -> auctionRepository.findById(auctionId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(auctionEntity -> auctionEntity
+                        .map(auction -> AuctionDto.builder()
+                                .id(auction.getId())
+                                .currentBid(auction.getCurrentBid())
+                                .startedAt(auction.getStartedAt())
+                                .build())
+                        .orElseThrow(() -> new IllegalArgumentException("잘못된 요청입니다.")));
     }
 
     @Override

@@ -2,6 +2,7 @@ package shop.biday.service;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import reactor.core.publisher.Mono;
 import shop.biday.model.domain.AuctionModel;
 import shop.biday.model.dto.AuctionDto;
 import shop.biday.model.entity.AuctionEntity;
@@ -10,6 +11,8 @@ import java.util.List;
 
 public interface AuctionService {
     AuctionModel findById(Long id);
+
+    Mono<AuctionDto> findByAuctionId(Long auctionId);
 
     Slice<AuctionDto> findBySize(Long sizeId, String order, Long cursor, Pageable pageable);
 
