@@ -53,7 +53,7 @@ public class SecurityConfig {
                         .authorizedClientService(authorizedClientService())
                         .authenticationSuccessHandler(oauth2SuccessHandler))
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/login","/reissue", "/logout","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**").permitAll())
+                        .pathMatchers("/login","/reissue", "/api/auctions/**","/logout","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**").permitAll())
                       // .anyExchange().authenticated())
                 .addFilterAt(loginFilter(loginSuccessHandler()), SecurityWebFiltersOrder.AUTHORIZATION)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplateUtils), SecurityWebFiltersOrder.LOGOUT)
@@ -73,6 +73,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setMaxAge(3600L);
 
         // CORS 설정을 경로에 따라 등록
