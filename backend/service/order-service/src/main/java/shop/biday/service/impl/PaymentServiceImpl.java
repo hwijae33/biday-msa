@@ -9,6 +9,8 @@ import shop.biday.exception.PaymentException;
 import shop.biday.model.domain.PaymentCardModel;
 import shop.biday.model.domain.PaymentModel;
 import shop.biday.model.domain.PaymentTempModel;
+import shop.biday.model.domain.UserInfoModel;
+import shop.biday.model.dto.PaymentDto;
 import shop.biday.model.dto.PaymentRequest;
 import shop.biday.model.dto.PaymentResponse;
 import shop.biday.model.entity.PaymentCardType;
@@ -19,6 +21,7 @@ import shop.biday.model.repository.PaymentRepository;
 import shop.biday.service.PaymentService;
 import shop.biday.utils.RedisTemplateUtils;
 import shop.biday.utils.TossPaymentTemplate;
+import shop.biday.utils.UserInfoUtils;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +38,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final TossPaymentTemplate tossPaymentTemplate;
-    private final RedisTemplateUtils<PaymentTempModel> redisTemplateUtils;
+    private final RedisTemplateUtils<PaymentDto> redisTemplateUtils;
+    private final UserInfoUtils userInfoUtils;
 
     @Override
     public PaymentEntity findById(Long id) {
@@ -66,19 +70,22 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void savePaymentTemp(PaymentTempModel paymentTempModel) {
-        redisTemplateUtils.save(paymentTempModel.orderId(), paymentTempModel);
+    public void savePaymentTemp(String userInfo, PaymentTempModel paymentTempModel) {
+//        UserInfoModel userInfo = userInfoUtils.extractUserInfo(userInfo);
+        redisTemplateUtils.save(paymentTempModel.orderId(), PaymentDto.builder()
+                .orderId(paymentTempModel.orderId())
+//                .userId(userInfo.getUserId())
+                .awardId(paymentTempModel.awardId())
+                .amount(paymentTempModel.amount())
+                .build());
     }
 
     @Override
-    public Boolean save(PaymentRequest paymentRequest) {
-//        UserEntity user = userService.findById(paymentRequest.userId())
-//                .orElseThrow(() -> new IllegalArgumentException("잘못된 사용자입니다."));
-        // TODO: 검증된 토큰 넘겨 받는거 체크
-        String userId = "1";
+    public Boolean save(String userInfo, PaymentRequest paymentRequest) {
+        UserInfoModel userInfoModel = userInfoUtils.extractUserInfo(userInfo);
 
-        PaymentTempModel paymentTempModel = getPaymentTempModel(paymentRequest);
-        if (!isCheckPaymentData(paymentRequest, paymentTempModel)) {
+        PaymentDto paymentDto = getPaymentTempModel(paymentRequest);
+        if (!isCheckPaymentData(paymentRequest, userInfoModel.getUserId(), paymentDto)) {
             return false;
         }
 
@@ -89,7 +96,7 @@ public class PaymentServiceImpl implements PaymentService {
         ZonedDateTime approvedAt = ZonedDateTime.parse(paymentModel.getApprovedAt(), DATE_TIME_FORMATTER);
 
         PaymentEntity payment = PaymentEntity.builder()
-                .userId(userId)
+                .userId(userInfoModel.getUserId())
                 .awardId(paymentRequest.awardId())
                 .paymentKey(paymentModel.getPaymentKey())
                 .type(paymentModel.getType())
@@ -123,33 +130,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         ZonedDateTime approvedAt = ZonedDateTime.parse(paymentModel.getApprovedAt(), DATE_TIME_FORMATTER);
 
-        //TODO : Role 변화 시 주석 해제 필요
-//        UserModel userModel = UserModel.builder()
-//                .id(payment.getUser().getId())
-//                .email(payment.getUser().getEmail())
-//                .name(payment.getUser().getName())
-//                .phoneNum(payment.getUser().getPhone())
-//                .role(payment.getUser().getRole())
-//                .build();
-//        AuctionModel auctionModel = AuctionModel.builder()
-//                .id(payment.getAward().getAuction().getId())
-//                .startingBid(payment.getAward().getAuction().getStartingBid())
-//                .currentBid(payment.getAward().getAuction().getCurrentBid())
-//                .build();
-//        AuctionDto auctionDto = AuctionDto.builder()
-//                .id(payment.getAward().getAuction().getId())
-//                .startingBid(payment.getAward().getAuction().getStartingBid())
-//                .currentBid(payment.getAward().getAuction().getCurrentBid())
-//                .build();
-//        AwardModel awardModel = AwardModel.builder()
-//                .id(payment.getAward().getId())
-//                .auction(auctionModel)
-//                .auction(auctionDto)
-//                .bidedAt(payment.getAward().getBidedAt())
-//                .currentBid(payment.getAward().getCurrentBid())
-//                .count(payment.getAward().getCount())
-//                .build();
-
         return new PaymentResponse(
                 payment.getId(),
                 payment.getUserId(),
@@ -171,35 +151,28 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.save(payment);
     }
 
-    // TODO user mongo로 올리면 변경 해야 함
     @Override
-    public List<PaymentRequest> findByUser(String token) {
-//        String user = jWTUtil.getEmail(token);
-//        log.info("Find Payment By User: {}", user);
-//        if (!userService.existsById(Long.valueOf(user))) {
-//            log.error("User not found");
-//            return null;
-//        } else {
-//            return paymentRepository.findByUser(user);
-//        }
-        return null;
+    public List<PaymentRequest> findByUser(String userInfo) {
+        UserInfoModel userInfoModel = userInfoUtils.extractUserInfo(userInfo);
+        log.info("Find Payment By UserInfo: {}", userInfo);
+        return paymentRepository.findByUser(userInfoModel.getUserId());
     }
 
-    private boolean isCheckPaymentData(PaymentRequest paymentRequest, PaymentTempModel paymentTempModel) {
-        if (paymentTempModel == null) {
+    private boolean isCheckPaymentData(PaymentRequest paymentRequest, String userId, PaymentDto paymentDto) {
+        if (paymentDto == null) {
             return false;
         }
-        return Objects.equals(paymentTempModel.orderId(), paymentRequest.orderId()) &&
-//                Objects.equals(paymentTempModel.userId(), paymentRequest.userId()) &&
-                Objects.equals(paymentTempModel.awardId(), paymentRequest.awardId()) &&
-                Objects.equals(paymentTempModel.amount(), paymentRequest.amount());
+        return Objects.equals(paymentDto.getOrderId(), paymentRequest.orderId()) &&
+                Objects.equals(paymentDto.getUserId(), userId) &&
+                Objects.equals(paymentDto.getAwardId(), paymentRequest.awardId()) &&
+                Objects.equals(paymentDto.getAmount(), paymentRequest.amount());
     }
 
     private void deletePaymentTempModel(String key) {
         redisTemplateUtils.delete(key);
     }
 
-    private PaymentTempModel getPaymentTempModel(PaymentRequest paymentRequest) {
-        return redisTemplateUtils.get(paymentRequest.orderId(), PaymentTempModel.class);
+    private PaymentDto getPaymentTempModel(PaymentRequest paymentRequest) {
+        return redisTemplateUtils.get(paymentRequest.orderId(), PaymentDto.class);
     }
 }

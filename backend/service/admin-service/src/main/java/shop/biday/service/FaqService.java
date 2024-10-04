@@ -8,11 +8,11 @@ public interface FaqService {
 
     List<FaqModel> findAll();
 
-    FaqModel save(FaqModel questionModel);
+    FaqModel save(String userInfo, FaqModel questionModel);
 
     FaqModel findById(Long id);
 
-    boolean deleteById(Long id);
+    boolean deleteById(Long id, String userInfo);
 
     boolean existsById(Long id);
 }
