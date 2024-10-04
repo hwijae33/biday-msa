@@ -3,7 +3,6 @@ package shop.biday.oauth2.jwt;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +15,6 @@ import reactor.util.context.Context;
 import shop.biday.model.domain.UserModel;
 import shop.biday.model.enums.Role;
 import shop.biday.oauth2.OauthDto.CustomOAuth2User;
-
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # IntelliJ IDEA JDK 경로, 실제 경로로 변경해주세요
-export JAVA_HOME="C:\\Program Files\Java\jdk-17"
+export JAVA_HOME="C:\\Program Files\\Java\\jdk-17"
 
 # 모듈 리스트
 all_modules=(

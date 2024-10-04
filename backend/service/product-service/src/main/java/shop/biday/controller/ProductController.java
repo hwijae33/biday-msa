@@ -78,7 +78,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "상품 등록 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "role", description = "현재 로그인한 사용자 token에서 추출한 role", example = "ROLE_ADMIN"),
+            @Parameter(name = "UserInfo", description = "현재 로그인한 사용자 token", example = ""),
             @Parameter(examples = {
                     @ExampleObject(name = "exampleProductModel", value = """ 
                         { 
@@ -106,7 +106,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "상품 수정 할 수 없음")
     })
     @Parameters({
-            @Parameter(name = "role", description = "현재 로그인한 사용자 token에서 추출한 role", example = "ROLE_ADMIN"),
+            @Parameter(name = "UserInfo", description = "현재 로그인한 사용자 token", example = ""),
             @Parameter(examples = {
                     @ExampleObject(name = "exampleProductModel", value = """ 
                         { 
@@ -122,9 +122,9 @@ public class ProductController {
                     """)})
     })
     public ResponseEntity<ProductEntity> updateProduct(
-            @RequestHeader String role,
+            @RequestHeader("UserInfo") String userInfoHeader,
             @RequestBody ProductModel product) {
-        return ResponseEntity.ok(productService.update(role, product));
+        return ResponseEntity.ok(productService.update(userInfoHeader, product));
     }
 
     @DeleteMapping
@@ -134,12 +134,12 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "상품 찾을 수 없음")
     })
     @Parameters({
-            @Parameter(name = "role", description = "현재 로그인한 사용자 token에서 추출한 role", example = "ROLE_ADMIN"),
+            @Parameter(name = "UserInfo", description = "현재 로그인한 사용자 token", example = ""),
             @Parameter(name = "productId", description = "상품 id", example = "1")
     })
     public ResponseEntity<String> deleteProduct(
-            @RequestHeader String role,
+            @RequestHeader("UserInfo") String userInfoHeader,
             @RequestParam(value = "productId", required = true) Long productId) {
-        return ResponseEntity.ok(productService.deleteById(role, productId));
+        return ResponseEntity.ok(productService.deleteById(userInfoHeader, productId));
     }
 }

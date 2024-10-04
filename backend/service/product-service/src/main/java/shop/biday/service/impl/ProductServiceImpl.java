@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import shop.biday.model.domain.ProductModel;
+import shop.biday.model.domain.UserInfoModel;
 import shop.biday.model.dto.ProductDto;
 import shop.biday.model.entity.ProductEntity;
 import shop.biday.model.entity.enums.Color;
@@ -11,6 +12,7 @@ import shop.biday.model.repository.BrandRepository;
 import shop.biday.model.repository.CategoryRepository;
 import shop.biday.model.repository.ProductRepository;
 import shop.biday.service.ProductService;
+import shop.biday.utils.UserInfoUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final UserInfoUtils userInfoUtils;
 
     @Override
     public Map<Long, ProductModel> findAll() {
@@ -47,14 +50,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public static String removeParentheses(String productName) {
-        int index = productName.indexOf(" (");
+        int index = productName.indexOf("(");
         return (index != -1) ? productName.substring(0, index) : productName;
     }
 
     @Override
-    public ProductEntity save(String role, ProductModel product) {
-        log.info("Saving product started with role: {}", role);
-        return validateUser(role)
+    public ProductEntity save(String userInfoHeader, ProductModel product) {
+        log.info("Saving product started with user: {}", userInfoHeader);
+        return validateUser(userInfoHeader)
                 .map(t -> {
                     ProductEntity savedProduct = createProductEntity(product);
                     log.info("Product saved successfully: {}", savedProduct.getId());
@@ -64,9 +67,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductEntity update(String role, ProductModel product) {
+    public ProductEntity update(String userInfoHeader, ProductModel product) {
         log.info("Updating product started for id: {}", product.getId());
-        return validateUser(role)
+        return validateUser(userInfoHeader)
                 .filter(t -> {
                     boolean exists = productRepository.existsById(product.getId());
                     if (!exists) {
@@ -84,10 +87,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String deleteById(String role, Long id) {
+    public String deleteById(String userInfoHeader, Long id) {
         log.info("Deleting product started for id: {}", id);
 
-        return validateUser(role).map(t -> {
+        return validateUser(userInfoHeader).map(t -> {
             if (!productRepository.existsById(id)) {
                 log.error("Product not found with id: {}", id);
                 return "상품 삭제 실패: 상품을 찾을 수 없습니다";
@@ -110,12 +113,13 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProducts(categoryId, brandId, keyword, color, order, lastItemId);
     }
 
-    private Optional<String> validateUser(String role) {
-        log.info("Validating user role: {}", role);
-        return Optional.ofNullable(role)
+    private Optional<String> validateUser(String userInfoHeader) {
+        log.info("Validating user user: {}", userInfoHeader);
+        UserInfoModel userInfoModel = userInfoUtils.extractUserInfo(userInfoHeader);
+        return Optional.ofNullable(userInfoModel.getUserRole())
                 .filter(t -> t.equalsIgnoreCase("ROLE_ADMIN"))
                 .or(() -> {
-                    log.error("User does not have role ADMIN: {}", role);
+                    log.error("User does not have role ADMIN: {}", userInfoModel.getUserRole());
                     return Optional.empty();
                 });
     }

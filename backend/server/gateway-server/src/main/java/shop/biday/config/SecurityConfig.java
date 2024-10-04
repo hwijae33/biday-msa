@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2Authoriz
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -22,7 +21,6 @@ import shop.biday.oauth2.UserDetailsService.CustomReactiveAuthenticationManager;
 import shop.biday.oauth2.jwt.*;
 import shop.biday.oauth2.social.CustomClientRegistrationRepo;
 import shop.biday.utils.RedisTemplateUtils;
-
 
 import java.util.Arrays;
 import java.util.Collections;
