@@ -18,8 +18,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Biday Admin API")
-                .description("Admin Services API")
+                .title("Biday SMS API")
+                .description("SMS Services API")
                 .version("0.0.1");
     }
 }
