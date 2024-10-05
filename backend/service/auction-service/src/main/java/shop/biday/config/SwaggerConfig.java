@@ -18,8 +18,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Biday Admin API")
-                .description("Admin Services API")
+                .title("Biday Auction API")
+                .description("Auction Services API")
                 .version("0.0.1");
     }
 }

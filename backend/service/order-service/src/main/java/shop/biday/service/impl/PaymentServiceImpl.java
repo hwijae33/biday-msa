@@ -71,10 +71,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void savePaymentTemp(String userInfo, PaymentTempModel paymentTempModel) {
-//        UserInfoModel userInfo = userInfoUtils.extractUserInfo(userInfo);
+        UserInfoModel userInfoModel = userInfoUtils.extractUserInfo(userInfo);
         redisTemplateUtils.save(paymentTempModel.orderId(), PaymentDto.builder()
                 .orderId(paymentTempModel.orderId())
-//                .userId(userInfo.getUserId())
+                .userId(userInfoModel.getUserId())
                 .awardId(paymentTempModel.awardId())
                 .amount(paymentTempModel.amount())
                 .build());
@@ -86,7 +86,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         PaymentDto paymentDto = getPaymentTempModel(paymentRequest);
         if (!isCheckPaymentData(paymentRequest, userInfoModel.getUserId(), paymentDto)) {
-            return false;
+            throw new PaymentException(HttpStatus.BAD_REQUEST, "INVALID_DATA_REQUEST", "일치하지 않는 정보 입니다.");
         }
 
         ResponseEntity<PaymentModel> response = tossPaymentTemplate.exchangePostMethod(APPROVE_URI, paymentRequest);

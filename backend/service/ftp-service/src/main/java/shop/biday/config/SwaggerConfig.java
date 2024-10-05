@@ -1,5 +1,11 @@
 package shop.biday.config;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 @Configuration
 public class SwaggerConfig {
 
@@ -12,8 +18,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Biday Product API")
-                .description("Product Services API")
+                .title("Biday FTP API")
+                .description("FTP Services API")
                 .version("0.0.1");
     }
 }
