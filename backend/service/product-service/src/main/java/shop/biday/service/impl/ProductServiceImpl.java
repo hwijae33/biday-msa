@@ -35,18 +35,36 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Map.Entry<Long, ProductModel>> findByProductId(Long id) {
+    public List<Map.Entry<Long, ProductModel>> findAllByProductName(Long id) {
         log.info("Finding product by id: {}", id);
 
-        if (!productRepository.existsById(id)) {
-            log.error("Product not found with id: {}", id);
-            return null;
-        }
+        return productRepository.findById(id)
+                .map(product -> {
+                    String productName = product.getName();
+                    log.info("Product found: {} with name: {}", id, productName);
 
-        Map<Long, ProductModel> map = productRepository.findByProductId(id,
-                removeParentheses(productRepository.findById(id).get().getName()));
+                    Map<Long, ProductModel> map = productRepository.findAllByProductName(id, removeParentheses(productName));
+                    return Objects.requireNonNull(map).entrySet().stream().toList();
+                })
+                .orElseGet(() -> {
+                    log.error("Product not found with id: {}", id);
+                    return List.of();
+                });
+    }
 
-        return Objects.requireNonNull(map).entrySet().stream().toList();
+    @Override
+    public Map<Long, ProductModel> findByProductId(Long id) {
+        log.info("Find product by id: {}", id);
+
+        return productRepository.findById(id)
+                .map(product -> {
+                    log.info("Product found: {}", product);
+                    return productRepository.findByProductId(id);
+                })
+                .orElseGet(() -> {
+                    log.error("Product not found with id: {}", id);
+                    return null;
+                });
     }
 
     public static String removeParentheses(String productName) {
@@ -114,10 +132,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Optional<String> validateUser(String userInfoHeader) {
-        log.info("Validating user user: {}", userInfoHeader);
+        log.info("Validating user: {}", userInfoHeader);
         UserInfoModel userInfoModel = userInfoUtils.extractUserInfo(userInfoHeader);
         return Optional.ofNullable(userInfoModel.getUserRole())
-                .filter(t -> t.equalsIgnoreCase("ROLE_ADMIN"))
+                .filter(role -> role.equalsIgnoreCase("ROLE_ADMIN"))
                 .or(() -> {
                     log.error("User does not have role ADMIN: {}", userInfoModel.getUserRole());
                     return Optional.empty();
@@ -125,6 +143,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductEntity createProductEntity(ProductModel product) {
+        log.info("Creating product entity for product: {}", product.getName());
         return ProductEntity.builder()
                 .brand(brandRepository.findByName(product.getBrand()))
                 .category(categoryRepository.findByName(product.getCategory()))

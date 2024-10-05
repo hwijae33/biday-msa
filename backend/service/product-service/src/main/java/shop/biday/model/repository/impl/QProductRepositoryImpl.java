@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import shop.biday.model.domain.ProductModel;
 import shop.biday.model.domain.SizeModel;
 import shop.biday.model.dto.ProductDto;
+import shop.biday.model.entity.*;
 import shop.biday.model.repository.QProductRepository;
 
 import java.util.List;
@@ -69,7 +70,7 @@ public class QProductRepositoryImpl implements QProductRepository {
     }
 
     @Override
-    public Map<Long, ProductModel> findByProductId(Long id, String name) {
+    public Map<Long, ProductModel> findAllByProductName(Long id, String name) {
         return queryFactory
                 .selectFrom(qProduct)
                 .leftJoin(qProduct.category, qCategory)
@@ -77,6 +78,19 @@ public class QProductRepositoryImpl implements QProductRepository {
                 .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
                 .leftJoin(qSize).on(qSize.product.id.eq(qProduct.id))
                 .where(qProduct.id.eq(id).or(qProduct.name.containsIgnoreCase(name)))
+                .orderBy(qSize.id.asc())
+                .transform(groupBy(qProduct.id).as(createProductModelProjection()));
+    }
+
+    @Override
+    public Map<Long, ProductModel> findByProductId(Long id) {
+        return queryFactory
+                .selectFrom(qProduct)
+                .leftJoin(qProduct.category, qCategory)
+                .leftJoin(qProduct.brand, qBrand)
+                .leftJoin(qWish).on(qProduct.id.eq(qWish.product.id))
+                .leftJoin(qSize).on(qSize.product.id.eq(qProduct.id))
+                .where(qProduct.id.eq(id))
                 .orderBy(qSize.id.asc())
                 .transform(groupBy(qProduct.id).as(createProductModelProjection()));
     }
