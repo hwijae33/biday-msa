@@ -51,13 +51,17 @@ public class SecurityConfig {
                         .authorizedClientService(authorizedClientService())
                         .authenticationSuccessHandler(oauth2SuccessHandler))
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/login","/reissue", "/api/auctions/**","/logout","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**").permitAll())
+                        .pathMatchers("/v3/api-docs/**",  "/swagger-ui/**", "/webjars/**").permitAll()
+                        .pathMatchers("/actuator/**",  "/*-service/**").permitAll()
+                        .pathMatchers("/login","/reissue", "/logout").permitAll()
+                        .pathMatchers( "/api/auctions/**","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**","/api/faqs/**","/api/images/**","/api/payments/**","/api/products/**","/api/sms/**").permitAll())
                       // .anyExchange().authenticated())
                 .addFilterAt(loginFilter(loginSuccessHandler()), SecurityWebFiltersOrder.AUTHORIZATION)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplateUtils), SecurityWebFiltersOrder.LOGOUT)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance());
         return http.build();
     }
+
 
     @Bean
     public WebSessionStore webSessionStore() {
@@ -70,7 +74,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "UserInfo"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setMaxAge(3600L);
 
@@ -78,7 +82,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
 
-        return request -> configuration;
+        return source;
     }
 
     @Bean
