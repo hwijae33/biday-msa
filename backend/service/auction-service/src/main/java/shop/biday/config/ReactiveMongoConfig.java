@@ -7,10 +7,10 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 import shop.biday.utils.BigIntegerToDecimal128Converter;
 import shop.biday.utils.Decimal128ToBigIntegerConverter;
 
+import java.util.Arrays;
+
 @Configuration
-@EnableReactiveMongoRepositories(basePackages = {
-        "shop.biday.model.repository"
-})
+@EnableReactiveMongoRepositories(basePackages = "shop.biday.model.repository")
 public class ReactiveMongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
@@ -19,8 +19,10 @@ public class ReactiveMongoConfig extends AbstractMongoClientConfiguration {
     }
 
     @Override
-    protected void configureConverters(MongoCustomConversions.MongoConverterConfigurationAdapter converterConfigurationAdapter) {
-        converterConfigurationAdapter.registerConverter(new BigIntegerToDecimal128Converter());
-        converterConfigurationAdapter.registerConverter(new Decimal128ToBigIntegerConverter());
+    public MongoCustomConversions customConversions() {
+        return new MongoCustomConversions(Arrays.asList(
+                new BigIntegerToDecimal128Converter(),
+                new Decimal128ToBigIntegerConverter()
+        ));
     }
 }

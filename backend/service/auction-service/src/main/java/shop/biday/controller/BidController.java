@@ -75,18 +75,24 @@ public class BidController {
                 .thenMany(bidSink.asFlux())
                 .onErrorResume(IOException.class, e -> {
                     log.warn("IOException 발생 클라이언트 연결 끊김, auctionId: {}", auctionId);
-                    bidSinks.remove(auctionId);
+                    if (bidSink.currentSubscriberCount() == 1) {
+                        bidSinks.remove(auctionId);
+                    }
                     return Flux.empty();
                 })
                 .timeout(Duration.ofMinutes(10))
                 .onErrorResume(TimeoutException.class, e -> {
                     log.warn("SSE 연결이 타임아웃되었습니다. auctionId: {}", auctionId);
-                    bidSinks.remove(auctionId);
+                    if (bidSink.currentSubscriberCount() == 1) {
+                        bidSinks.remove(auctionId);
+                    }
                     return Flux.empty();
                 })
                 .doOnCancel(() -> {
                     log.warn("클라이언트가 연결을 끊었습니다. auctionId: {}", auctionId);
-                    bidSinks.remove(auctionId);
+                    if (bidSink.currentSubscriberCount() == 1) {
+                        bidSinks.remove(auctionId);
+                    }
                 }).log();
     }
 

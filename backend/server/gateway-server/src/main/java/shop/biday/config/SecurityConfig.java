@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .pathMatchers("/v3/api-docs/**",  "/swagger-ui/**", "/webjars/**").permitAll()
                         .pathMatchers("/actuator/**",  "/*-service/**").permitAll()
                         .pathMatchers("/login","/reissue", "/logout").permitAll()
-                        .pathMatchers( "/api/auctions/**","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**","/api/faqs/**","/api/images/**","/api/payments/**","/api/products/**","/api/sms/**").permitAll())
+                        .pathMatchers("/api/bids/**", "/api/auctions/**","/api/loginHistory/**", "/api/users/**", "/api/account/**","/api/addresses/**","/api/faqs/**","/api/images/**","/api/payments/**","/api/products/**","/api/sms/**").permitAll())
                       // .anyExchange().authenticated())
                 .addFilterAt(loginFilter(loginSuccessHandler()), SecurityWebFiltersOrder.AUTHORIZATION)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplateUtils), SecurityWebFiltersOrder.LOGOUT)
