@@ -16,10 +16,11 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh '''#!/bin/bash
+                    sh '''
+                        #!/bin/bash
+                        set -e
+                        export JAVA_HOME="$JAVA_HOME"
 
-                       # IntelliJ IDEA JDK 경로, 실제 경로로 변경해주세요
-                       export JAVA_HOME="$JAVA_HOME"
 
                        # 모듈 리스트
                        all_modules=(
