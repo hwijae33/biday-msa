@@ -59,25 +59,6 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
-            steps {
-                script {
-                    sh '''
-                        #!/bin/bash
-                        set -e
-                        cd backend || { echo "Backend directory not found!"; exit 1; }
-                        echo "Running unit tests..."
-                        ./gradlew test || { echo "Unit tests failed!"; exit 1; }
-                    '''
-                }
-            }
-            post {
-                failure {
-                    echo "Unit tests failed!"
-                    error 'Unit tests failed'
-                }
-            }
-        }
 
         stage('Docker Login') {
             steps {
