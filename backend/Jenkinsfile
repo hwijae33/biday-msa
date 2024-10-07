@@ -1,0 +1,141 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'MODULE', defaultValue: 'all', description: 'Specify module to build (or all)')
+    }
+
+    environment {
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-17" // JDK path
+        GRADLE_HOME = "C:\\path\\to\\gradle" // Gradle path
+        PATH = "${GRADLE_HOME}/bin:${env.PATH}" // Add Gradle to PATH
+        DOCKER_HUB_REPO = "hwijae/biday" // Docker Hub repository
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    sh 'chmod +x buildModule.sh' // Grant execute permissions to the script
+                    sh './buildModule.sh' // Execute the script
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true // Archive artifacts
+                }
+                failure {
+                    error 'Build failed'
+                }
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                script {
+                    sh './gradlew test' // Run unit tests
+                }
+            }
+            post {
+                failure {
+                    error 'Unit tests failed'
+                }
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'DockerHub_IdPw', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    }
+                }
+            }
+        }
+        stage('Docker build') {
+            steps {
+                script {
+
+                    sh 'docker-compose build'
+
+                }
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                script {
+                    def services = [
+                        "product-service",
+                        "order-service",
+                        "gateway-server",
+                        "ftp-service",
+                        "auction-service",
+                        "user-service",
+                        "admin-service",
+                        "sms-service",
+                        "eureka-server"
+                    ]
+
+                    for (service in services) {
+                        echo "Tagging and pushing ${service}..."
+                        sh "docker tag biday/${service}:latest ${DOCKER_HUB_REPO}:${service}"
+                        sh "docker push ${DOCKER_HUB_REPO}:${service}"
+                    }
+                }
+            }
+            post {
+                failure {
+                    error 'Docker push failed'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up...'
+            // Add cleanup tasks if necessary
+        }
+        success {
+            notifySlack("Build succeeded!", "good")
+            notifyDiscord("Build succeeded!", "success")
+        }
+        failure {
+            notifySlack("Build failed!", "danger")
+            notifyDiscord("Build failed!", "failure")
+        }
+    }
+}
+
+// Functions to send notifications
+def notifySlack(String message, String color) {
+    withCredentials([string(credentialsId: 'Slack_webhook', variable: 'SLACK_WEBHOOK')]) {
+        def slackPayload = [
+            text: message,
+            attachments: [
+                [
+                    title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
+                    text: """
+                    제목 : ${currentBuild.displayName}
+                    결과 : ${currentBuild.result}
+                    실행 시간 : ${currentBuild.duration / 1000}s
+                    """,
+                    color: color
+                ]
+            ]
+        ]
+        sh "curl -X POST -H 'Content-Type: application/json' -d '${groovy.json.JsonOutput.toJson(slackPayload)}' ${SLACK_WEBHOOK}"
+    }
+}
+
+def notifyDiscord(String message, String result) {
+    withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
+        discordSend description: """
+        제목 : ${currentBuild.displayName}
+        결과 : ${currentBuild.result}
+        실행 시간 : ${currentBuild.duration / 1000}s
+        """,
+        link: env.BUILD_URL, result: result,
+        title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
+        webhookURL: "$DISCORD"
+    }
+}
