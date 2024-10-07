@@ -21,32 +21,19 @@ pipeline {
                         set -e
                         export JAVA_HOME="$JAVA_HOME"
 
+                        # Module list
+                        all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
 
-                       # 모듈 리스트
-                       all_modules=(
-                           "server:eureka-server"
-                           "server:config-server"
-                           "server:gateway-server"
-                           "service:admin-service"
-                           "service:auction-service"
-                           "service:ftp-service"
-                           "service:order-service"
-                           "service:product-service"
-                           "service:sms-service"
-                           "service:user-service"
-                       )
+                        # Gradle clean
+                        echo "Cleaning..."
+                        ./gradlew clean
 
-                       # Gradle clean
-                       echo "Cleaning..."
-                       ./gradlew clean
-
-                       # Gradle BootJar
-                       for module in "${all_modules[@]}"
-                       do
-                           echo "Building BootJar for $module"
-                           ./gradlew :$module:bootJar
-                       done
-                       '''
+                        # Gradle BootJar
+                        for module in $all_modules; do
+                            echo "Building BootJar for $module"
+                            ./gradlew :$module:bootJar
+                        done
+                    '''
                 }
             }
             post {
@@ -71,6 +58,7 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Login') {
             steps {
                 script {
@@ -80,15 +68,15 @@ pipeline {
                 }
             }
         }
+
         stage('Docker build') {
             steps {
                 script {
-
                     sh 'docker-compose build'
-
                 }
             }
         }
+
         stage('Docker Push') {
             steps {
                 script {
