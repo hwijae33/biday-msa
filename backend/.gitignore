@@ -50,5 +50,6 @@ out/
 .env
 
 # Ignore MySQL socket files
-backend/mysql/demo/var/lib/mysql/mysql.sock
-backend/mysql/demo/var/lib/mysql/*
+backend/mysql/**
+backend/mongodb/**
+backend/redis/**

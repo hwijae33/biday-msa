@@ -60,7 +60,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
 
     // config
-    implementation 'org.springframework.cloud:spring-cloud-config:4.1.3'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
