@@ -35,6 +35,7 @@ pipeline {
                         all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
 
                         echo "Cleaning..."
+                        chmod +x ./gradlew
                         ./gradlew clean
 
                         for module in $all_modules; do
