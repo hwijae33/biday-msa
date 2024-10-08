@@ -68,17 +68,17 @@ pipeline {
             }
         }
 
-        stage('Docker build') {
-            steps {
-                script {
-                    sh 'pwd'
-                    dir('backend') {
-                        sh 'ls -la'
-                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-                    }
-                }
-            }
-        }
+//         stage('Docker build') {
+//             steps {
+//                 script {
+//                     sh 'pwd'
+//                     dir('backend') {
+//                         sh 'ls -la'
+//                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+//                     }
+//                 }
+//             }
+//         }
 
 //         stage('Docker Push') {
 //             steps {
@@ -140,10 +140,6 @@ pipeline {
                     attachments: attachments,
                     tokenCredentialId: 'Slack_webhook' // 자격 증명 ID 입력
                 )
-
-                sh "rm -f ${env.WORKSPACE}/test-result.txt"
-                sh "cp ${env.WORKSPACE}/test-result.txt ${env.WORKSPACE}/test-result.txt"
-                slackUploadFile(channel: env.SLACK_CHANNEL, filePath: "test-result.txt", initialComment: "integration test result log")
             }
         }
         failure {
