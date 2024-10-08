@@ -11,10 +11,10 @@ pipeline {
         PATH = "${GRADLE_HOME}/bin:${env.PATH}" // Add Gradle to PATH
         DOCKER_HUB_REPO = "hwijae/biday" // Docker Hub repository
         SLACK_WEBHOOK = credentials('Slack-Webhook') // Jenkins Credentials에서 설정한 ID
+        SLACK_CHANNEL = '#jenkins-log' // 슬랙 채널 이름
     }
 
     stages {
-
 //         stage('Build') {
 //             steps {
 //                 script {
@@ -48,7 +48,6 @@ pipeline {
 //                     '''
 //                 }
 //             }
-//
 //             post {
 //                 success {
 //                     archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
@@ -70,19 +69,20 @@ pipeline {
             }
         }
 
-        stage('Docker build') {
-            steps {
-                script {
-                    sh 'pwd'
-                    dir('backend') {
-                        sh 'ls -la'
-                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-                    }
-                }
-            }
-        }
+//         stage('Docker build') {
+//             steps {
+//                 script {
+//                     sh 'pwd'
+//                     dir('backend') {
+//                         sh 'ls -la'
+//                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+//                     }
+//                 }
+//             }
+//         }
 
 //         stage('Docker Push') {
+//
 //             steps {
 //                 script {
 //                     def services = [
@@ -109,7 +109,7 @@ pipeline {
 //                     echo "Docker push failed!"
 //                     error 'Docker push failed'
 //                 }
-//             }
+//              }
 //         }
     }
 
@@ -118,28 +118,63 @@ pipeline {
             echo 'Cleaning up...'
         }
         success {
-            notifySlack("Build succeeded!", "good")
-            notifyDiscord("Build succeeded!", "success")
+            script {
+                def testSummary = "모든 테스트가 성공했습니다." // 실제 테스트 요약 내용으로 변경
+                def blocks = [
+                    [
+                        "type": "section",
+                        "text": [
+                            "type": "mrkdwn",
+                            "text": "Build success - integration-test (<${env.BUILD_URL}|Open>)\n${testSummary}"
+                        ]
+                    ]
+                ]
+
+                def attachments = [
+                    [
+                        "color": "#2db372",
+                        "blocks": blocks
+                    ]
+                ]
+
+                slackSend(
+                    channel: env.SLACK_CHANNEL,
+                    attachments: attachments
+                )
+
+                // 파일 복사 및 업로드
+                sh "rm -f ${env.WORKSPACE}/test-result.txt"
+                sh "cp ${env.WORKSPACE}/test-result.txt ${env.WORKSPACE}/test-result.txt"
+                slackUploadFile(channel: env.SLACK_CHANNEL, filePath: "test-result.txt", initialComment: "integration test result log")
+            }
         }
         failure {
-            notifySlack("Build failed!", "danger")
-            notifyDiscord("Build failed!", "failure")
+            script {
+                def testSummary = "테스트 중 오류가 발생했습니다." // 실제 오류 메시지로 변경
+                def blocks = [
+                    [
+                        "type": "section",
+                        "text": [
+                            "type": "mrkdwn",
+                            "text": "Build failure - integration-test (<${env.BUILD_URL}|Open>)\n${testSummary}"
+                        ]
+                    ]
+                ]
+
+                def attachments = [
+                    [
+                        "color": "#b3312d",
+                        "blocks": blocks
+                    ]
+                ]
+
+                slackSend(
+                    channel: env.SLACK_CHANNEL,
+                    attachments: attachments
+                )
+            }
         }
     }
-}
-
-def notifySlack(String message, String result) {
-
-    def webhookUrl = env.SLACK_WEBHOOK
-
-    def payload = [
-        text: "${message} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-        color: result
-    ]
-
-    sh """
-        curl -X POST -H 'Content-type: application/json' --data '${groovy.json.JsonOutput.toJson(payload)}' ${webhookUrl}
-    """
 }
 
 def notifyDiscord(String message, String result) {
