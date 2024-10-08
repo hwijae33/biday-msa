@@ -14,51 +14,51 @@ pipeline {
 
     stages {
 
-//         stage('Build') {
-//             steps {
-//                 script {
-//                     sh '''
-//                         #!/bin/bash
-//                         set -e
-//                         export JAVA_HOME="$JAVA_HOME"
-//
-//                         # Change to the backend directory
-//                         cd backend || { echo "Backend directory not found!"; exit 1; }
-//
-//                         echo "Current directory contents:"
-//                         ls -la  # List the contents of the backend directory
-//
-//                         # Check if gradlew exists and make it executable
-//                         if [ -f "./gradlew" ]; then
-//                             echo "Found gradlew. Making it executable..."
-//                             chmod +x ./gradlew
-//                         else
-//                             echo "gradlew not found!"
-//                             exit 1
-//                         fi
-//
-//                         all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
-//
-//                         echo "Cleaning..."
-//                         ./gradlew clean
-//
-//                         for module in $all_modules; do
-//                             echo "Building BootJar for $module"
-//                             ./gradlew :$module:bootJar || { echo "Failed to build $module"; exit 1; }
-//                         done
-//                     '''
-//                 }
-//             }
-//             post {
-//                 success {
-//                     archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
-//                 }
-//                 failure {
-//                     echo "Build stage failed!"
-//                     error 'Build failed'
-//                 }
-//             }
-//         }
+        stage('Build') {
+            steps {
+                script {
+                    sh '''
+                        #!/bin/bash
+                        set -e
+                        export JAVA_HOME="$JAVA_HOME"
+
+                        # Change to the backend directory
+                        cd backend || { echo "Backend directory not found!"; exit 1; }
+
+                        echo "Current directory contents:"
+                        ls -la  # List the contents of the backend directory
+
+                        # Check if gradlew exists and make it executable
+                        if [ -f "./gradlew" ]; then
+                            echo "Found gradlew. Making it executable..."
+                            chmod +x ./gradlew
+                        else
+                            echo "gradlew not found!"
+                            exit 1
+                        fi
+
+                        all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
+
+                        echo "Cleaning..."
+                        ./gradlew clean
+
+                        for module in $all_modules; do
+                            echo "Building BootJar for $module"
+                            ./gradlew :$module:bootJar || { echo "Failed to build $module"; exit 1; }
+                        done
+                    '''
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
+                }
+                failure {
+                    echo "Build stage failed!"
+                    error 'Build failed'
+                }
+            }
+        }
 
 
         stage('Docker Login') {
