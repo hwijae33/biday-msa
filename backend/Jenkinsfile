@@ -10,7 +10,6 @@ pipeline {
         GRADLE_HOME = '/opt/gradle'
         PATH = "${GRADLE_HOME}/bin:${env.PATH}"
         DOCKER_HUB_REPO = "hwijae/biday"
-        SLACK_WEBHOOK = credentials('Slack-Webhook')
         SLACK_CHANNEL = '#jenkins-log'
     }
 
@@ -69,17 +68,17 @@ pipeline {
             }
         }
 
-//         stage('Docker build') {
-//             steps {
-//                 script {
-//                     sh 'pwd'
-//                     dir('backend') {
-//                         sh 'ls -la'
-//                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-//                     }
-//                 }
-//             }
-//         }
+        stage('Docker build') {
+            steps {
+                script {
+                    sh 'pwd'
+                    dir('backend') {
+                        sh 'ls -la'
+                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+                    }
+                }
+            }
+        }
 
 //         stage('Docker Push') {
 //             steps {
@@ -137,9 +136,9 @@ pipeline {
                 ]
 
                 slackSend(
-                    webhookUrl: env.SLACK_WEBHOOK,
                     channel: env.SLACK_CHANNEL,
-                    attachments: attachments
+                    attachments: attachments,
+                    tokenCredentialId: 'Slack_webhook' // 자격 증명 ID 입력
                 )
 
                 sh "rm -f ${env.WORKSPACE}/test-result.txt"
@@ -168,9 +167,9 @@ pipeline {
                 ]
 
                 slackSend(
-                    webhookUrl: env.SLACK_WEBHOOK,
                     channel: env.SLACK_CHANNEL,
-                    attachments: attachments
+                    attachments: attachments,
+                    tokenCredentialId: 'Slack_webhook' // 자격 증명 ID 입력
                 )
             }
         }
