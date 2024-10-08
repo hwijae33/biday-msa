@@ -6,12 +6,12 @@ pipeline {
     }
 
     environment {
-        JAVA_HOME = '/opt/java/openjdk' // JDK path
-        GRADLE_HOME = '/opt/gradle' // Replace with the correct Gradle path
-        PATH = "${GRADLE_HOME}/bin:${env.PATH}" // Add Gradle to PATH
-        DOCKER_HUB_REPO = "hwijae/biday" // Docker Hub repository
-        SLACK_WEBHOOK = credentials('Slack-Webhook') // Jenkins Credentials에서 설정한 ID
-        SLACK_CHANNEL = '#jenkins-log' // 슬랙 채널 이름
+        JAVA_HOME = '/opt/java/openjdk'
+        GRADLE_HOME = '/opt/gradle'
+        PATH = "${GRADLE_HOME}/bin:${env.PATH}"
+        DOCKER_HUB_REPO = "hwijae/biday"
+        SLACK_WEBHOOK = credentials('Slack-Webhook')
+        SLACK_CHANNEL = '#jenkins-log'
     }
 
     stages {
@@ -82,7 +82,6 @@ pipeline {
 //         }
 
 //         stage('Docker Push') {
-//
 //             steps {
 //                 script {
 //                     def services = [
@@ -109,7 +108,7 @@ pipeline {
 //                     echo "Docker push failed!"
 //                     error 'Docker push failed'
 //                 }
-//              }
+//             }
 //         }
     }
 
@@ -119,7 +118,7 @@ pipeline {
         }
         success {
             script {
-                def testSummary = "모든 테스트가 성공했습니다." // 실제 테스트 요약 내용으로 변경
+                def testSummary = "모든 테스트가 성공했습니다."
                 def blocks = [
                     [
                         "type": "section",
@@ -138,11 +137,11 @@ pipeline {
                 ]
 
                 slackSend(
+                    webhookUrl: env.SLACK_WEBHOOK,
                     channel: env.SLACK_CHANNEL,
                     attachments: attachments
                 )
 
-                // 파일 복사 및 업로드
                 sh "rm -f ${env.WORKSPACE}/test-result.txt"
                 sh "cp ${env.WORKSPACE}/test-result.txt ${env.WORKSPACE}/test-result.txt"
                 slackUploadFile(channel: env.SLACK_CHANNEL, filePath: "test-result.txt", initialComment: "integration test result log")
@@ -150,7 +149,7 @@ pipeline {
         }
         failure {
             script {
-                def testSummary = "테스트 중 오류가 발생했습니다." // 실제 오류 메시지로 변경
+                def testSummary = "테스트 중 오류가 발생했습니다."
                 def blocks = [
                     [
                         "type": "section",
@@ -169,6 +168,7 @@ pipeline {
                 ]
 
                 slackSend(
+                    webhookUrl: env.SLACK_WEBHOOK,
                     channel: env.SLACK_CHANNEL,
                     attachments: attachments
                 )
