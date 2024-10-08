@@ -123,37 +123,16 @@ pipeline {
             echo 'Cleaning up...'
         }
         success {
-            notifySlack("Build succeeded!", "good")
+
             notifyDiscord("Build succeeded!", "success")
         }
         failure {
-            notifySlack("Build failed!", "danger")
+
             notifyDiscord("Build failed!", "failure")
         }
     }
 }
 
-def notifySlack(String message, String color) {
-    withCredentials([string(credentialsId: 'Slack_webhook', variable: 'SLACK_WEBHOOK')]) {
-        def slackPayload = [
-            text: message,
-            attachments: [
-                [
-                    title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
-                    text: """
-                    제목 : ${currentBuild.displayName}
-                    결과 : ${currentBuild.result}
-                    실행 시간 : ${currentBuild.duration / 1000}s
-                    """,
-                    color: color
-                ]
-            ]
-        ]
-        def slackPayloadJson = groovy.json.JsonOutput.toJson(slackPayload)
-        // 비밀번호 주입 없이 명령어 실행
-        sh "curl -X POST -H 'Content-Type: application/json' -d '${slackPayloadJson}' ${SLACK_WEBHOOK}"
-    }
-}
 
 def notifyDiscord(String message, String result) {
     withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
