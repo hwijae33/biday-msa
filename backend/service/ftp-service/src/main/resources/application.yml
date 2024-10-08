@@ -1,0 +1,51 @@
+server:
+  port: 9102
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: ftp-service
+  profiles:
+    active: local
+  config:
+    import: optional:configserver:http://localhost:8888/
+
+  data:
+    mongodb:
+      username: root
+      password: biday
+      host: localhost
+      port: 27017
+      database: bidaydb
+      authentication-database: admin
+
+  s3:
+    accessKey: 7DAA7F1227005921F7FA
+    secretKey: 9BC192EFE561C5DE254F2E3E3E5F8DF21D897E8D
+    bucket: biday-test
+
+openapi:
+  service:
+    url: http://localhost:8000
+  swagger-ui:
+    path: /swagger-ui
+
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    path: /api/images/v3/api-docs
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

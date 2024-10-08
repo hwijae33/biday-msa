@@ -1,0 +1,205 @@
+services:
+  eureka-server:
+    build:
+      context: ./server/eureka-server
+      dockerfile: Dockerfile
+    image: biday/eureka-server:latest
+    container_name: biday-eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - biday-network
+#    depends_on:
+#      - config-server
+    hostname: biday-eureka-host
+
+#  config-server:
+#    build:
+#      context: ./server/config-server
+#      dockerfile: Dockerfile
+#    image: biday/config-server:latest
+#    container_name: biday-config-server
+#    ports:
+#      - "8888:8888"
+#    networks:
+#      - biday-network
+#    hostname: biday-config-host
+
+  gateway-server:
+    build:
+      context: ./server/gateway-server
+      dockerfile: Dockerfile
+    image: biday/gateway-server:latest
+    container_name: biday-gateway-server
+    ports:
+      - "8080:8080"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+    hostname: biday-gateway-host
+
+  admin-service:
+    build:
+      context: ./service/admin-service
+      dockerfile: Dockerfile
+    image: biday/admin-service:latest
+    container_name: biday-admin-service
+    ports:
+      - "9100:9100"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+
+    hostname: biday-admin-host
+
+  auction-service:
+    build:
+      context: ./service/auction-service
+      dockerfile: Dockerfile
+    image: biday/auction-service:latest
+    container_name: biday-auction-service
+    ports:
+      - "9101:9101"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+
+    hostname: biday-auction-host
+
+  ftp-service:
+    build:
+      context: ./service/ftp-service
+      dockerfile: Dockerfile
+    image: biday/ftp-service:latest
+    container_name: biday-ftp-service
+    ports:
+      - "9102:9102"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+    hostname: biday-ftp-host
+
+  order-service:
+    build:
+      context: ./service/order-service
+      dockerfile: Dockerfile
+    image: biday/order-service:latest
+    container_name: biday-order-service
+    ports:
+      - "9103:9103"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+
+    hostname: biday-order-host
+
+  product-service:
+    build:
+      context: ./service/product-service
+      dockerfile: Dockerfile
+    image: biday/product-service:latest
+    container_name: biday-product-service
+    ports:
+      - "9104:9104"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+
+
+    hostname: biday-product-host
+
+  sms-service:
+    build:
+      context: ./service/sms-service
+      dockerfile: Dockerfile
+    image: biday/sms-service:latest
+    container_name: biday-sms-service
+    ports:
+      - "9105:9105"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+    hostname: biday-sms-host
+
+  user-service:
+    build:
+      context: ./service/user-service
+      dockerfile: Dockerfile
+    image: biday/user-service:latest
+    container_name: biday-user-service
+    ports:
+      - "9106:9106"
+    networks:
+      - biday-network
+    depends_on:
+#      - config-server
+      - eureka-server
+    hostname: biday-user-host
+
+
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    volumes:
+      - ./mysql/demo/etc/mysql/conf.d:/etc/mysql/conf.d:ro
+      - ./mysql/demo/var/lib/mysql:/var/lib/mysql
+      - ./mysql/demo/var/log/mysql:/var/log/mysql
+    environment:
+      - MYSQL_DATABASE=bidaydb
+      - MYSQL_ROOT_PASSWORD=biday
+      - MYSQL_ROOT_HOST=%
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - biday-network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass biday
+    volumes:
+      - ./redis/data:/data
+      - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    restart: always
+    networks:
+      - biday-network
+
+  mongodb:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb:/data/mydb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=biday
+      - MONGO_INITDB_DATABASE=bidaydb
+    restart: always
+    networks:
+      - biday-network
+
+networks:
+  biday-network:
+    driver: bridge

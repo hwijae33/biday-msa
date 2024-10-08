@@ -1,0 +1,57 @@
+server:
+  port: 8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      show-details: always
+encrypt:
+  key: my-secret
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        encrypt:
+          enabled: false
+        git:
+          uri: git@github.com:biday5/biday-secret.git
+          default-label: main
+          ignoreLocalSshSettings: true
+          strictHostKeyChecking: false
+          privateKey: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            MIIEogIBAAKCAQEAhgtOzlW2zT2vqPadddCQsuKJI8jarLXMG5Ww9qPnFLxZsqTv
+            87JLjswy/qLpPk5ACYnWmU0D8z8HyRBSe0jBXuaCg6dCe57hQrLQ4BjoBkQcWxgj  
+            f9BkwotmqVuHzaJvMucXFtdZim49AYsA5bVf0No8yRvATeHvPszB+s8G+eAb6PoY
+            utpBmwKEsFKxlSBFWZOCPhkAMqlj2m7zccs4cqodqR69TeLSVS3DrBW3nv5J/KoX
+            oiYTy3+DJ9j9dyrRPdS8k3Z4M1ArJxaqJGsMPHHupp40JoJPMwbSYCNvgBY+BMsn
+            y8kFgamztLRiKIeKxVK18n0plw2RhkeGUHwK1QIDAQABAoIBABTT1vfae5/iUNP5
+            FbhDougYqORlhgzF5qP2m1uHVhVzuqA2Xo5ICtNySQ4ltAYZVHvm7fA99joqdgQ4
+            xAgh4uHjAS6Bo6PfqPKbJDddx1eJ57oDwyhN8goEbPwtm6lI7uxC2eSTq3cF7/a4
+            aXhHuU6TSlSZOkUfsPPaDt3wow3aGexoqKCHZcKba66ahrbwYb6uURZ+kavgL4gb
+            zBLgeCHs82qtz85DjF8EICN3h2I/X1pmJPvLNrp2IP+3gFaAvvmfpnXeh0TJdlXy
+            xkZHy3h2/wEnhesNi9Nv/u6soTSql+Cc3NFlaDNQ+XuenlBl5ovwDyfUncvSKacH
+            i3DwWSECgYEAxZWC9dxCLd/dToRoVFeoCa6WgFFB18JcF6W1YP5RSbWdP/mU7ovI
+            SVAqSKjSut/gABpFhbAK4UwHSsNdxHFRt/F2LPo+dXuv4obAeGDU6k9x//t8Vs4j
+            pfljBYfTpYyj8/e3JCsSrSF1bdlb2MUYtpBp89pcjF+6E+lcNU9AS6kCgYEArays
+            IVs8vIU9o+6RnLteOJ/ZincEqDa8LgFn8CfkWYXkIXJ3uEf9dR6k0yNy+7JAtxkV
+            uLz7B7fJYrT3g2L9Sc8hse02LAOn8sNalplTEL+pIy6Z1KHeBeQxlIPAfoYRT5Oi
+            OFCJDZ3XycBK8AjMTPU26njFZAMCzgFy6NAQoU0CgYAfz0VJPc+twQfJF0oQohgc
+            ju4N9IcMLG9VI0mDNw5xNnr9jLnsebaiDvTvw7ZBfb97ZL9imYf2452c7L0Q3kmQ
+            uqAS96rMkUAs0RL1jmlY27d3xc4rz34vv2mwv0BUu8K9iVkDyqd0FhnouICv8nNb
+            GP7l0nbp5pN3ly9QKdUpGQKBgG02dFfVg/AY6ZY446BnwuxguO/1wBv3r4ZOpAnF
+            TDdvlvHhhZ+AxcXsq0GKvTfB9CgvwhUV4dYMoLtNiYg5q4XKlynIPZSYB/kFF+Y0
+            LKQPolDZcSrhTzjtMrBt2ZK2xBQChrRbEJRbeeMI5RbksXSDjzELGTW3HwBksNnu
+            XUbRAoGAda6OMnpiWbKWoXAt4OSy6e9pHcBWzItlZ1//EYQzWYg5gVPE9GhxvawK
+            HKBIeLvo5QefQOi0M5R6sf1xN8Dyzci7TLzulR+XDIxwrK3R1ffT/gExGZlp6DWY
+            EAn1pyfZJ8ajNAxDsRo6kae5s7PvBwOmi6ZO9TrOq+YabNKPbTU=
+            -----END OPENSSH PRIVATE KEY-----
