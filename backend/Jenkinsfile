@@ -72,16 +72,20 @@ pipeline {
         }
 
 
-       stage('Docker build') {
-           steps {
-               script {
-                   dir('backend') {
-                       sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-                   }
-               }
-           }
-       }
+        stage('Docker build') {
+            steps {
+                script {
+                    // 현재 작업 디렉토리 출력
+                    sh 'pwd'
 
+                    // backend 디렉토리로 이동하여 파일 목록 출력
+                    dir('backend') {
+                        sh 'ls -la'  // backend 디렉토리 내 파일 목록 확인
+                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+                    }
+                }
+            }
+        }
 
         stage('Docker Push') {
             steps {
