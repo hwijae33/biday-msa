@@ -133,7 +133,6 @@ pipeline {
     }
 }
 
-// Functions to send notifications
 def notifySlack(String message, String color) {
     withCredentials([string(credentialsId: 'Slack_webhook', variable: 'SLACK_WEBHOOK')]) {
         def slackPayload = [
@@ -150,7 +149,8 @@ def notifySlack(String message, String color) {
                 ]
             ]
         ]
-        sh "curl -X POST -H 'Content-Type: application/json' -d '${groovy.json.JsonOutput.toJson(slackPayload)}' ${SLACK_WEBHOOK}"
+        def slackPayloadJson = groovy.json.JsonOutput.toJson(slackPayload)
+        sh "curl -X POST -H 'Content-Type: application/json' -d '${slackPayloadJson}' ${SLACK_WEBHOOK}"
     }
 }
 
@@ -163,6 +163,6 @@ def notifyDiscord(String message, String result) {
         """,
         link: env.BUILD_URL, result: result,
         title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
-        webhookURL: "$DISCORD"
+        webhookURL: DISCORD  // 변수를 따옴표 없이 사용
     }
 }
