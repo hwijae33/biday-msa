@@ -23,13 +23,11 @@ pipeline {
 //                         set -e
 //                         export JAVA_HOME="$JAVA_HOME"
 //
-//                         # Change to the backend directory
 //                         cd backend || { echo "Backend directory not found!"; exit 1; }
 //
 //                         echo "Current directory contents:"
-//                         ls -la  # List the contents of the backend directory
+//                         ls -la
 //
-//                         # Check if gradlew exists and make it executable
 //                         if [ -f "./gradlew" ]; then
 //                             echo "Found gradlew. Making it executable..."
 //                             chmod +x ./gradlew
@@ -50,6 +48,7 @@ pipeline {
 //                     '''
 //                 }
 //             }
+//
 //             post {
 //                 success {
 //                     archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
@@ -61,7 +60,6 @@ pipeline {
 //             }
 //         }
 
-
         stage('Docker Login') {
             steps {
                 script {
@@ -72,16 +70,12 @@ pipeline {
             }
         }
 
-
         stage('Docker build') {
             steps {
                 script {
-                    // 현재 작업 디렉토리 출력
                     sh 'pwd'
-
-                    // backend 디렉토리로 이동하여 파일 목록 출력
                     dir('backend') {
-                        sh 'ls -la'  // backend 디렉토리 내 파일 목록 확인
+                        sh 'ls -la'
                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
                     }
                 }
@@ -135,13 +129,16 @@ pipeline {
 }
 
 def notifySlack(String message, String result) {
+
+    def webhookUrl = env.SLACK_WEBHOOK
+
     def payload = [
         text: "${message} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
         color: result
     ]
 
     sh """
-        curl -X POST -H 'Content-type: application/json' --data '${groovy.json.JsonOutput.toJson(payload)}' ${SLACK_WEBHOOK}
+        curl -X POST -H 'Content-type: application/json' --data '${groovy.json.JsonOutput.toJson(payload)}' ${webhookUrl}
     """
 }
 
@@ -154,7 +151,6 @@ def notifyDiscord(String message, String result) {
         """,
         link: env.BUILD_URL, result: result,
         title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
-        webhookURL: DISCORD  // 변수를 따옴표 없이 사용
+        webhookURL: DISCORD
     }
 }
-
