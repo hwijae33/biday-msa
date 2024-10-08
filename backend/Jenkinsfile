@@ -14,49 +14,49 @@ pipeline {
     }
 
     stages {
-//         stage('Build') {
-//             steps {
-//                 script {
-//                     sh '''
-//                         #!/bin/bash
-//                         set -e
-//                         export JAVA_HOME="$JAVA_HOME"
-//
-//                         cd backend || { echo "Backend directory not found!"; exit 1; }
-//
-//                         echo "Current directory contents:"
-//                         ls -la
-//
-//                         if [ -f "./gradlew" ]; then
-//                             echo "Found gradlew. Making it executable..."
-//                             chmod +x ./gradlew
-//                         else
-//                             echo "gradlew not found!"
-//                             exit 1
-//                         fi
-//
-//                         all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
-//
-//                         echo "Cleaning..."
-//                         ./gradlew clean
-//
-//                         for module in $all_modules; do
-//                             echo "Building BootJar for $module"
-//                             ./gradlew :$module:bootJar || { echo "Failed to build $module"; exit 1; }
-//                         done
-//                     '''
-//                 }
-//             }
-//             post {
-//                 success {
-//                     archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
-//                 }
-//                 failure {
-//                     echo "Build stage failed!"
-//                     error 'Build failed'
-//                 }
-//             }
-//         }
+        stage('Build') {
+            steps {
+                script {
+                    sh '''
+                        #!/bin/bash
+                        set -e
+                        export JAVA_HOME="$JAVA_HOME"
+
+                        cd backend || { echo "Backend directory not found!"; exit 1; }
+
+                        echo "Current directory contents:"
+                        ls -la
+
+                        if [ -f "./gradlew" ]; then
+                            echo "Found gradlew. Making it executable..."
+                            chmod +x ./gradlew
+                        else
+                            echo "gradlew not found!"
+                            exit 1
+                        fi
+
+                        all_modules="server:eureka-server server:config-server server:gateway-server service:admin-service service:auction-service service:ftp-service service:order-service service:product-service service:sms-service service:user-service"
+
+                        echo "Cleaning..."
+                        ./gradlew clean
+
+                        for module in $all_modules; do
+                            echo "Building BootJar for $module"
+                            ./gradlew :$module:bootJar || { echo "Failed to build $module"; exit 1; }
+                        done
+                    '''
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
+                }
+                failure {
+                    echo "Build stage failed!"
+                    error 'Build failed'
+                }
+            }
+        }
 
         stage('Docker Login') {
             steps {
@@ -68,47 +68,47 @@ pipeline {
             }
         }
 
-//         stage('Docker build') {
-//             steps {
-//                 script {
-//                     sh 'pwd'
-//                     dir('backend') {
-//                         sh 'ls -la'
-//                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-//                     }
-//                 }
-//             }
-//         }
+        stage('Docker build') {
+            steps {
+                script {
+                    sh 'pwd'
+                    dir('backend') {
+                        sh 'ls -la'
+                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+                    }
+                }
+            }
+        }
 
-//         stage('Docker Push') {
-//             steps {
-//                 script {
-//                     def services = [
-//                         "product-service",
-//                         "order-service",
-//                         "gateway-server",
-//                         "ftp-service",
-//                         "auction-service",
-//                         "user-service",
-//                         "admin-service",
-//                         "sms-service",
-//                         "eureka-server"
-//                     ]
-//
-//                     for (service in services) {
-//                         echo "Tagging and pushing ${service}..."
-//                         sh "docker tag biday/${service}:latest ${DOCKER_HUB_REPO}:${service} || { echo 'Docker tag failed for ${service}!'; exit 1; }"
-//                         sh "docker push ${DOCKER_HUB_REPO}:${service} || { echo 'Docker push failed for ${service}!'; exit 1; }"
-//                     }
-//                 }
-//             }
-//             post {
-//                 failure {
-//                     echo "Docker push failed!"
-//                     error 'Docker push failed'
-//                 }
-//             }
-//         }
+        stage('Docker Push') {
+            steps {
+                script {
+                    def services = [
+                        "product-service",
+                        "order-service",
+                        "gateway-server",
+                        "ftp-service",
+                        "auction-service",
+                        "user-service",
+                        "admin-service",
+                        "sms-service",
+                        "eureka-server"
+                    ]
+
+                    for (service in services) {
+                        echo "Tagging and pushing ${service}..."
+                        sh "docker tag biday/${service}:latest ${DOCKER_HUB_REPO}:${service} || { echo 'Docker tag failed for ${service}!'; exit 1; }"
+                        sh "docker push ${DOCKER_HUB_REPO}:${service} || { echo 'Docker push failed for ${service}!'; exit 1; }"
+                    }
+                }
+            }
+            post {
+                failure {
+                    echo "Docker push failed!"
+                    error 'Docker push failed'
+                }
+            }
+        }
     }
 
     post {
@@ -130,16 +130,20 @@ pipeline {
 
                 def attachments = [
                     [
-                        "color": "#2db372",
+                        "color": "#000000",
                         "blocks": blocks
                     ]
                 ]
 
+                // 슬랙 메세지 보내기
                 slackSend(
                     channel: env.SLACK_CHANNEL,
                     attachments: attachments,
                     tokenCredentialId: 'Slack_webhook' // 자격 증명 ID 입력
                 )
+
+                // Discord 메세지 보내기
+                notifyDiscord("Build succeeded!", "good")
             }
         }
         failure {
@@ -162,11 +166,15 @@ pipeline {
                     ]
                 ]
 
+                // 슬랙 메세지 보내기
                 slackSend(
                     channel: env.SLACK_CHANNEL,
                     attachments: attachments,
                     tokenCredentialId: 'Slack_webhook' // 자격 증명 ID 입력
                 )
+
+                // Discord 메세지 보내기
+                notifyDiscord("Build failed!", "danger")
             }
         }
     }
