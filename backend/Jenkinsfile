@@ -10,6 +10,7 @@ pipeline {
         GRADLE_HOME = '/opt/gradle' // Replace with the correct Gradle path
         PATH = "${GRADLE_HOME}/bin:${env.PATH}" // Add Gradle to PATH
         DOCKER_HUB_REPO = "hwijae/biday" // Docker Hub repository
+        SLACK_WEBHOOK = credentials('Slack-Webhook') // Jenkins Credentials에서 설정한 ID
     }
 
     stages {
@@ -133,27 +134,15 @@ pipeline {
     }
 }
 
-// Slack 알림 함수
-def notifySlack(String message, String color) {
-    def slackPayload = [
-        text: message,
-        attachments: [
-            [
-                title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("FAILURE") ? "실패" : "성공"}",
-                text: """
-                제목 : ${currentBuild.displayName}
-                결과 : ${currentBuild.result}
-                실행 시간 : ${currentBuild.duration / 1000}s
-                """,
-                color: color
-            ]
-        ]
+def notifySlack(String message, String result) {
+    def payload = [
+        text: "${message} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        color: result
     ]
 
-    def slackPayloadJson = groovy.json.JsonOutput.toJson(slackPayload)
-
-    // 비밀번호 주입 없이 명령어 실행
-    sh script: "curl -X POST -H 'Content-Type: application/json' -d '${slackPayloadJson}' '${SLACK_WEBHOOK}'", returnStatus: true
+    sh """
+        curl -X POST -H 'Content-type: application/json' --data '${groovy.json.JsonOutput.toJson(payload)}' ${SLACK_WEBHOOK}
+    """
 }
 
 def notifyDiscord(String message, String result) {
