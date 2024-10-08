@@ -61,61 +61,61 @@ pipeline {
         }
 
 
-//         stage('Docker Login') {
-//             steps {
-//                 script {
-//                     withCredentials([usernamePassword(credentialsId: 'DockerHub_IdPw', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-//                         sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-//                     }
-//                 }
-//             }
-//         }
-//
-//
-//         stage('Docker build') {
-//             steps {
-//                 script {
-//                     // 현재 작업 디렉토리 출력
-//                     sh 'pwd'
-//
-//                     // backend 디렉토리로 이동하여 파일 목록 출력
-//                     dir('backend') {
-//                         sh 'ls -la'  // backend 디렉토리 내 파일 목록 확인
-//                         sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
-//                     }
-//                 }
-//             }
-//         }
-//
-//         stage('Docker Push') {
-//             steps {
-//                 script {
-//                     def services = [
-//                         "product-service",
-//                         "order-service",
-//                         "gateway-server",
-//                         "ftp-service",
-//                         "auction-service",
-//                         "user-service",
-//                         "admin-service",
-//                         "sms-service",
-//                         "eureka-server"
-//                     ]
-//
-//                     for (service in services) {
-//                         echo "Tagging and pushing ${service}..."
-//                         sh "docker tag biday/${service}:latest ${DOCKER_HUB_REPO}:${service} || { echo 'Docker tag failed for ${service}!'; exit 1; }"
-//                         sh "docker push ${DOCKER_HUB_REPO}:${service} || { echo 'Docker push failed for ${service}!'; exit 1; }"
-//                     }
-//                 }
-//             }
-//             post {
-//                 failure {
-//                     echo "Docker push failed!"
-//                     error 'Docker push failed'
-//                 }
-//             }
-//         }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'DockerHub_IdPw', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    }
+                }
+            }
+        }
+
+
+        stage('Docker build') {
+            steps {
+                script {
+                    // 현재 작업 디렉토리 출력
+                    sh 'pwd'
+
+                    // backend 디렉토리로 이동하여 파일 목록 출력
+                    dir('backend') {
+                        sh 'ls -la'  // backend 디렉토리 내 파일 목록 확인
+                        sh 'docker-compose build || { echo "Docker build failed!"; exit 1; }'
+                    }
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    def services = [
+                        "product-service",
+                        "order-service",
+                        "gateway-server",
+                        "ftp-service",
+                        "auction-service",
+                        "user-service",
+                        "admin-service",
+                        "sms-service",
+                        "eureka-server"
+                    ]
+
+                    for (service in services) {
+                        echo "Tagging and pushing ${service}..."
+                        sh "docker tag biday/${service}:latest ${DOCKER_HUB_REPO}:${service} || { echo 'Docker tag failed for ${service}!'; exit 1; }"
+                        sh "docker push ${DOCKER_HUB_REPO}:${service} || { echo 'Docker push failed for ${service}!'; exit 1; }"
+                    }
+                }
+            }
+            post {
+                failure {
+                    echo "Docker push failed!"
+                    error 'Docker push failed'
+                }
+            }
+        }
     }
 
     post {
@@ -133,26 +133,27 @@ pipeline {
     }
 }
 
+// Slack 알림 함수
 def notifySlack(String message, String color) {
-    withCredentials([string(credentialsId: 'Slack_webhook', variable: 'SLACK_WEBHOOK')]) {
-        def slackPayload = [
-            text: message,
-            attachments: [
-                [
-                    title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("failed") ? "실패" : "성공"}",
-                    text: """
-                    제목 : ${currentBuild.displayName}
-                    결과 : ${currentBuild.result}
-                    실행 시간 : ${currentBuild.duration / 1000}s
-                    """,
-                    color: color
-                ]
+    def slackPayload = [
+        text: message,
+        attachments: [
+            [
+                title: "${env.JOB_NAME} : ${currentBuild.displayName} ${message.contains("FAILURE") ? "실패" : "성공"}",
+                text: """
+                제목 : ${currentBuild.displayName}
+                결과 : ${currentBuild.result}
+                실행 시간 : ${currentBuild.duration / 1000}s
+                """,
+                color: color
             ]
         ]
-        def slackPayloadJson = groovy.json.JsonOutput.toJson(slackPayload)
-        // 비밀번호 주입 없이 명령어 실행
-        sh "curl -X POST -H 'Content-Type: application/json' -d '${slackPayloadJson}' ${SLACK_WEBHOOK}"
-    }
+    ]
+
+    def slackPayloadJson = groovy.json.JsonOutput.toJson(slackPayload)
+
+    // 비밀번호 주입 없이 명령어 실행
+    sh script: "curl -X POST -H 'Content-Type: application/json' -d '${slackPayloadJson}' '${SLACK_WEBHOOK}'", returnStatus: true
 }
 
 def notifyDiscord(String message, String result) {

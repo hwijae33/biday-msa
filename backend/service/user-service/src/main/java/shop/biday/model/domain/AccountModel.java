@@ -22,5 +22,5 @@ public class AccountModel {
     private String accountNum;
     private String accountName;
     private String bankRspCode;
-    private Date bankTranDate;
+    private String bankTranDate;
 }

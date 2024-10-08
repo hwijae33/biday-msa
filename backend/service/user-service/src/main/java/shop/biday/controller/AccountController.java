@@ -39,8 +39,11 @@ public class AccountController {
     @Parameters({
             @Parameter(name = "userId", description = "유저번호", example = "66f3601fd3d86243cceb4718")
     })
-    public ResponseEntity<Mono<AccountDocument>> findById(@RequestHeader("UserInfo") String userInfoHeader) {
-        return new ResponseEntity<>(accountService.findByUserId(userInfoHeader), HttpStatus.OK);
+
+    public Mono<ResponseEntity<AccountDocument>> findById(@RequestHeader("UserInfo") String userInfoHeader) {
+        return accountService.findByUserId(userInfoHeader)
+                .map(accountDocument -> ResponseEntity.ok(accountDocument))
+                .defaultIfEmpty(ResponseEntity.notFound().build()); // 값이 없을 경우 404 반환
     }
 
     @PostMapping("/save")

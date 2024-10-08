@@ -46,7 +46,7 @@ public class AccountDocument {
     private String bankRspCode;
 
     @Field("bank_tran_date")
-    private Date bankTranDate;
+    private String bankTranDate;
 
     @CreatedDate
     @Field(write = Field.Write.ALWAYS)
